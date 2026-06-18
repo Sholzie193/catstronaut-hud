@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#05070d">
+    <meta name="description" content="Catstronaut HUD, an immersive scroll-scrubbed astronaut cat microsite.">
+    <meta property="og:title" content="Catstronaut HUD">
+    <meta property="og:description" content="An immersive scroll-scrubbed astronaut cat mission interface.">
+    <meta property="og:image" content="./poster.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Catstronaut HUD</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main id="top">
+      <section class="orbital-stage" aria-label="Catstronaut HUD video experience">
+        <div class="sticky-orbit">
+          <img
+            id="missionFrame"
+            class="mission-video"
+            src="./frames/frame_000.jpg"
+            width="1280"
+            height="720"
+            fetchpriority="high"
+            decoding="async"
+            alt="Astronaut cat floating above Earth"
+            aria-label="Astronaut cat floating above Earth"
+          >
+
+          <div class="vignette" aria-hidden="true"></div>
+          <div class="glass-sheen" aria-hidden="true"></div>
+
+          <header class="topbar" aria-label="Mission navigation">
+            <a class="brand" href="#top" aria-label="Catstronaut HUD home">
+              <span class="brand-mark" aria-hidden="true"></span>
+              <span>Catstronaut HUD</span>
+            </a>
+            <nav class="navlinks" aria-label="Page sections">
+              <a href="#telemetry">Telemetry</a>
+              <a href="#capture">Capture</a>
+              <a href="#share">Share</a>
+            </nav>
+          </header>
+
+          <section class="hero-copy" aria-labelledby="heroTitle">
+            <p class="eyebrow">Orbit feed 08s</p>
+            <h1 id="heroTitle" data-text="Catstronaut lock.">Catstronaut lock.</h1>
+            <p class="lede">Scroll through a cinematic mission view with glass telemetry, orbital drift, and a final frame built for social capture.</p>
+            <a class="primary-action" href="#share">
+              <span class="action-glyph" aria-hidden="true"></span>
+              <span>Prepare share frame</span>
+            </a>
+          </section>
+
+          <aside class="glass-panel mission-card" aria-label="Mission status">
+            <div class="panel-kicker">Mission state</div>
+            <div class="status-row">
+              <span>Signal</span>
+              <strong>Stable</strong>
+            </div>
+            <div class="status-row">
+              <span>Altitude</span>
+              <strong>Low orbit</strong>
+            </div>
+            <div class="status-row">
+              <span>Subject</span>
+              <strong>Awake</strong>
+            </div>
+            <div class="progress-shell" aria-hidden="true">
+              <span id="progressBar"></span>
+            </div>
+          </aside>
+
+          <aside class="glass-panel scanner-card" aria-label="Scanner status">
+            <div>
+              <div class="panel-kicker">Signal lock</div>
+              <strong>Orbit sequence active</strong>
+            </div>
+          </aside>
+
+          <div class="scroll-cue" aria-hidden="true">
+            <span></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="telemetry" class="content-band telemetry-band">
+        <div class="section-inner split-layout">
+          <div>
+            <p class="section-label">Telemetry</p>
+            <h2 data-text="Designed like a mission interface, not a video embed.">Designed like a mission interface, not a video embed.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card reveal">
+              <span class="feature-index">01</span>
+              <h3>Scroll-scrubbed drift</h3>
+              <p>The 8-second clip is mapped to page progress, so the viewer controls the orbital movement instead of watching a passive loop.</p>
+            </article>
+            <article class="feature-card reveal">
+              <span class="feature-index">02</span>
+              <h3>Glass HUD layers</h3>
+              <p>Translucent panels and visor reflections build on the helmet shape already present in the footage without covering the clip.</p>
+            </article>
+            <article class="feature-card reveal">
+              <span class="feature-index">03</span>
+              <h3>Responsive by design</h3>
+              <p>Mobile uses a calmer layout with compact panels and protected text zones while preserving the same immersive feel.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="capture" class="content-band capture-band">
+        <div class="section-inner capture-layout">
+          <div class="capture-frame reveal" aria-hidden="true">
+            <img class="mini-video" src="./frames/frame_095.jpg" width="1280" height="720" alt="">
+          </div>
+          <div class="capture-copy reveal">
+            <p class="section-label">Capture mode</p>
+            <h2 data-text="A clean final scene for X, reels, and short posts.">A clean final scene for X, reels, and short posts.</h2>
+            <p>The ending is kept readable and high-contrast so a screen recording still looks intentional after platform compression.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="share" class="content-band share-band">
+        <div class="section-inner share-panel reveal">
+          <p class="section-label">Transmission clear</p>
+          <h2 data-text="Ready for the final share pass.">Ready for the final share pass.</h2>
+          <p>Use the opening as the hook, the mid-orbit rotation as the reveal, and the wide final frame as the social thumbnail.</p>
+          <a class="primary-action secondary-action" href="#top">
+            <span class="action-glyph" aria-hidden="true"></span>
+            <span>Replay orbit</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

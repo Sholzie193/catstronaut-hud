@@ -1,0 +1,79 @@
+const stage = document.querySelector(".orbital-stage");
+const root = document.documentElement;
+const missionFrame = document.querySelector("#missionFrame");
+const progressBar = document.querySelector("#progressBar");
+
+const frameCount = 96;
+const framePaths = Array.from({ length: frameCount }, (_, index) => `./frames/frame_${String(index).padStart(3, "0")}.jpg`);
+let targetFrame = 0;
+let smoothFrame = 0;
+let currentFrame = 0;
+let scrollProgress = 0;
+let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const preloadedFrames = new Map();
+
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const lerp = (from, to, amount) => from + (to - from) * amount;
+
+function updateScrollProgress() {
+  const rect = stage.getBoundingClientRect();
+  const travel = Math.max(1, rect.height - window.innerHeight);
+  scrollProgress = clamp(-rect.top / travel);
+  targetFrame = scrollProgress * (frameCount - 1);
+}
+
+function preloadFrames() {
+  framePaths.forEach((path, index) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = path;
+    if (image.decode) {
+      image.decode().catch(() => {});
+    }
+    preloadedFrames.set(index, image);
+  });
+}
+
+function updateMissionFrame() {
+  smoothFrame = reducedMotion ? targetFrame : lerp(smoothFrame, targetFrame, 0.42);
+  const nextFrame = clamp(Math.round(smoothFrame), 0, frameCount - 1);
+  if (nextFrame !== currentFrame) {
+    currentFrame = nextFrame;
+    missionFrame.src = framePaths[currentFrame];
+  }
+}
+
+function updateCssState() {
+  root.style.setProperty("--scroll-progress", scrollProgress.toFixed(4));
+  root.style.setProperty("--video-scale", `${(1.03 - scrollProgress * 0.02).toFixed(4)}`);
+  root.style.setProperty("--copy-y", `${(scrollProgress * -16).toFixed(2)}px`);
+  if (progressBar) {
+    progressBar.style.width = `${scrollProgress * 100}%`;
+  }
+}
+
+function tick() {
+  updateScrollProgress();
+  updateMissionFrame();
+  updateCssState();
+  requestAnimationFrame(tick);
+}
+
+function setupReveals() {
+  const reveals = document.querySelectorAll(".reveal");
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    }
+  }, { threshold: 0.18 });
+
+  reveals.forEach((item) => observer.observe(item));
+}
+
+preloadFrames();
+setupReveals();
+updateScrollProgress();
+tick();
