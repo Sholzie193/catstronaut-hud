@@ -4,13 +4,14 @@ const missionFrame = document.querySelector("#missionFrame");
 const progressBar = document.querySelector("#progressBar");
 
 const frameCount = 96;
-const framePaths = Array.from({ length: frameCount }, (_, index) => `./frames/frame_${String(index).padStart(3, "0")}.jpg`);
+const framePaths = Array.from({ length: frameCount }, (_, index) => `/frames/frame_${String(index).padStart(3, "0")}.jpg`);
 let targetFrame = 0;
 let smoothFrame = 0;
 let currentFrame = 0;
 let scrollProgress = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloadedFrames = new Map();
+const requestedFrames = new Set([0]);
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (from, to, amount) => from + (to - from) * amount;
@@ -23,20 +24,52 @@ function updateScrollProgress() {
 }
 
 function preloadFrames() {
-  framePaths.forEach((path, index) => {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = path;
-    if (image.decode) {
-      image.decode().catch(() => {});
-    }
-    preloadedFrames.set(index, image);
-  });
+  const priorityFrames = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 95];
+  priorityFrames.forEach(requestFrame);
+
+  const loadRemaining = () => {
+    let index = 1;
+    const loadBatch = () => {
+      const end = Math.min(frameCount, index + 8);
+      for (; index < end; index += 1) {
+        requestFrame(index);
+      }
+      if (index < frameCount) {
+        setTimeout(loadBatch, 180);
+      }
+    };
+    loadBatch();
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(loadRemaining, { timeout: 1600 });
+  } else {
+    setTimeout(loadRemaining, 900);
+  }
+}
+
+function requestFrame(index) {
+  if (requestedFrames.has(index) || index < 0 || index >= frameCount) {
+    return;
+  }
+  requestedFrames.add(index);
+  const image = new Image();
+  image.decoding = "async";
+  image.src = framePaths[index];
+  preloadedFrames.set(index, image);
+}
+
+function warmNearbyFrames(index) {
+  requestFrame(index);
+  requestFrame(index + 1);
+  requestFrame(index + 2);
+  requestFrame(index - 1);
 }
 
 function updateMissionFrame() {
   smoothFrame = reducedMotion ? targetFrame : lerp(smoothFrame, targetFrame, 0.42);
   const nextFrame = clamp(Math.round(smoothFrame), 0, frameCount - 1);
+  warmNearbyFrames(nextFrame);
   if (nextFrame !== currentFrame) {
     currentFrame = nextFrame;
     missionFrame.src = framePaths[currentFrame];
