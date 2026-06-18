@@ -12,6 +12,8 @@ let scrollProgress = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloadedFrames = new Map();
 const requestedFrames = new Set([0]);
+const readyFrames = new Set([0]);
+let pendingFrame = 0;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (from, to, amount) => from + (to - from) * amount;
@@ -55,25 +57,68 @@ function requestFrame(index) {
   requestedFrames.add(index);
   const image = new Image();
   image.decoding = "async";
-  image.src = framePaths[index];
   preloadedFrames.set(index, image);
+
+  const markReady = () => {
+    const decode = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
+    decode.then(() => {
+      if (image.naturalWidth > 0) {
+        readyFrames.add(index);
+        if (index === pendingFrame) {
+          swapFrame(index);
+        }
+      }
+    });
+  };
+
+  image.addEventListener("load", markReady, { once: true });
+  image.addEventListener("error", () => requestedFrames.delete(index), { once: true });
+  image.src = framePaths[index];
 }
 
 function warmNearbyFrames(index) {
+  requestFrame(index - 2);
   requestFrame(index);
   requestFrame(index + 1);
   requestFrame(index + 2);
   requestFrame(index - 1);
 }
 
+function findReadyFrame(index) {
+  if (readyFrames.has(index)) {
+    return index;
+  }
+
+  for (let distance = 1; distance < 7; distance += 1) {
+    const previous = index - distance;
+    const next = index + distance;
+
+    if (readyFrames.has(previous)) {
+      return previous;
+    }
+
+    if (readyFrames.has(next)) {
+      return next;
+    }
+  }
+
+  return currentFrame;
+}
+
+function swapFrame(index) {
+  if (index === currentFrame || !readyFrames.has(index)) {
+    return;
+  }
+  currentFrame = index;
+  missionFrame.src = framePaths[currentFrame];
+}
+
 function updateMissionFrame() {
   smoothFrame = reducedMotion ? targetFrame : lerp(smoothFrame, targetFrame, 0.42);
   const nextFrame = clamp(Math.round(smoothFrame), 0, frameCount - 1);
+  pendingFrame = nextFrame;
   warmNearbyFrames(nextFrame);
-  if (nextFrame !== currentFrame) {
-    currentFrame = nextFrame;
-    missionFrame.src = framePaths[currentFrame];
-  }
+  swapFrame(findReadyFrame(nextFrame));
 }
 
 function updateCssState() {
