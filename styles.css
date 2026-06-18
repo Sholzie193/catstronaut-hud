@@ -58,7 +58,7 @@ a {
   min-height: 620px;
   overflow: hidden;
   perspective: 1200px;
-  background: #02040a;
+  background: #07101b;
   isolation: isolate;
 }
 
@@ -75,7 +75,7 @@ a {
   object-fit: cover;
   object-position: center;
   z-index: 0;
-  filter: saturate(1.04) contrast(1.03);
+  filter: brightness(1.18) saturate(1.12) contrast(1.02);
   transform: scale(var(--video-scale, 1.02)) translate3d(0, 0, 0);
   transition: filter 180ms ease;
   will-change: contents, transform;
@@ -84,8 +84,9 @@ a {
 .vignette {
   z-index: 2;
   background:
-    linear-gradient(90deg, rgba(1, 4, 10, 0.68), rgba(1, 4, 10, 0.2) 38%, rgba(1, 4, 10, 0.55)),
-    linear-gradient(0deg, rgba(1, 4, 10, 0.64), transparent 38%, rgba(1, 4, 10, 0.24));
+    radial-gradient(circle at 56% 42%, rgba(126, 220, 255, 0.13), transparent 32rem),
+    linear-gradient(90deg, rgba(5, 12, 22, 0.46), rgba(5, 12, 22, 0.08) 38%, rgba(5, 12, 22, 0.34)),
+    linear-gradient(0deg, rgba(5, 12, 22, 0.48), transparent 40%, rgba(5, 12, 22, 0.14));
   pointer-events: none;
 }
 
@@ -93,8 +94,9 @@ a {
   z-index: 3;
   pointer-events: none;
   background:
-    linear-gradient(115deg, transparent 10%, rgba(255, 255, 255, 0.08) 17%, transparent 25%);
-  opacity: 0.36;
+    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.12), transparent 22rem),
+    linear-gradient(115deg, transparent 10%, rgba(255, 255, 255, 0.11) 17%, transparent 26%);
+  opacity: 0.46;
 }
 
 .topbar {
@@ -582,8 +584,9 @@ h3 {
 
   .vignette {
     background:
-      linear-gradient(0deg, rgba(1, 4, 10, 0.88), rgba(1, 4, 10, 0.22) 45%, rgba(1, 4, 10, 0.38)),
-      linear-gradient(90deg, rgba(1, 4, 10, 0.38), transparent 45%, rgba(1, 4, 10, 0.22));
+      radial-gradient(circle at 52% 36%, rgba(126, 220, 255, 0.13), transparent 20rem),
+      linear-gradient(0deg, rgba(5, 12, 22, 0.66), rgba(5, 12, 22, 0.12) 45%, rgba(5, 12, 22, 0.22)),
+      linear-gradient(90deg, rgba(5, 12, 22, 0.24), transparent 45%, rgba(5, 12, 22, 0.14));
   }
 
   .topbar {
