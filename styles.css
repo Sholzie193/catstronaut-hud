@@ -81,7 +81,7 @@ a {
   inset: -28vh 0 auto;
   height: 28vh;
   background: #07101b url("/frames/frame_000.jpg") center top / cover no-repeat;
-  filter: brightness(1.18) saturate(1.12) contrast(1.02);
+  filter: brightness(1.08) saturate(1.18) contrast(1.2);
   pointer-events: none;
 }
 
@@ -111,7 +111,7 @@ a {
   object-position: center;
   z-index: 0;
   background: #07101b url("/frames/frame_000.jpg") center / cover no-repeat;
-  filter: brightness(1.18) saturate(1.12) contrast(1.02);
+  filter: brightness(1.08) saturate(1.18) contrast(1.2);
   transform: scale(var(--video-scale, 1.02)) translate3d(0, 0, 0);
   transition: filter 180ms ease;
   will-change: transform;
@@ -120,9 +120,9 @@ a {
 .vignette {
   z-index: 2;
   background:
-    radial-gradient(circle at 56% 42%, rgba(126, 220, 255, 0.13), transparent 32rem),
-    linear-gradient(90deg, rgba(5, 12, 22, 0.46), rgba(5, 12, 22, 0.08) 38%, rgba(5, 12, 22, 0.34)),
-    linear-gradient(0deg, rgba(5, 12, 22, 0.48), transparent 40%, rgba(5, 12, 22, 0.14));
+    radial-gradient(circle at 56% 42%, rgba(126, 220, 255, 0.06), transparent 32rem),
+    linear-gradient(90deg, rgba(5, 12, 22, 0.36), rgba(5, 12, 22, 0.03) 38%, rgba(5, 12, 22, 0.26)),
+    linear-gradient(0deg, rgba(5, 12, 22, 0.36), transparent 40%, rgba(5, 12, 22, 0.08));
   pointer-events: none;
 }
 
@@ -130,9 +130,9 @@ a {
   z-index: 3;
   pointer-events: none;
   background:
-    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.12), transparent 22rem),
-    linear-gradient(115deg, transparent 10%, rgba(255, 255, 255, 0.11) 17%, transparent 26%);
-  opacity: 0.46;
+    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.08), transparent 22rem),
+    linear-gradient(115deg, transparent 10%, rgba(255, 255, 255, 0.08) 17%, transparent 26%);
+  opacity: 0.34;
 }
 
 .topbar {
@@ -629,9 +629,9 @@ h3 {
 
   .vignette {
     background:
-      radial-gradient(circle at 52% 36%, rgba(126, 220, 255, 0.13), transparent 20rem),
-      linear-gradient(0deg, rgba(5, 12, 22, 0.66), rgba(5, 12, 22, 0.12) 45%, rgba(5, 12, 22, 0.22)),
-      linear-gradient(90deg, rgba(5, 12, 22, 0.24), transparent 45%, rgba(5, 12, 22, 0.14));
+      radial-gradient(circle at 52% 36%, rgba(126, 220, 255, 0.07), transparent 20rem),
+      linear-gradient(0deg, rgba(5, 12, 22, 0.56), rgba(5, 12, 22, 0.06) 45%, rgba(5, 12, 22, 0.14)),
+      linear-gradient(90deg, rgba(5, 12, 22, 0.18), transparent 45%, rgba(5, 12, 22, 0.08));
   }
 
   .topbar {
