@@ -206,7 +206,7 @@ a {
   position: absolute;
   z-index: 8;
   left: clamp(20px, 5vw, 76px);
-  bottom: clamp(98px, 16vh, 170px);
+  bottom: clamp(56px, 9vh, 108px);
   max-width: min(540px, calc(100vw - 40px));
   transform: translate3d(0, var(--copy-y, 0), 50px);
 }
@@ -589,7 +589,7 @@ h3 {
   }
 
   .hero-copy {
-    bottom: 92px;
+    bottom: 68px;
   }
 
   .mission-card {
@@ -670,7 +670,7 @@ h3 {
   .hero-copy {
     left: 16px;
     right: 16px;
-    bottom: calc(168px + env(safe-area-inset-bottom));
+    bottom: calc(158px + env(safe-area-inset-bottom));
     max-width: none;
   }
 
