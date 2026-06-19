@@ -1,18 +1,19 @@
 const stage = document.querySelector(".orbital-stage");
 const root = document.documentElement;
 const missionFrame = document.querySelector("#missionFrame");
+const frameContext = missionFrame.getContext("2d", { alpha: false, desynchronized: true });
 const progressBar = document.querySelector("#progressBar");
 
 const frameCount = 96;
 const framePaths = Array.from({ length: frameCount }, (_, index) => `/frames/frame_${String(index).padStart(3, "0")}.jpg`);
 let targetFrame = 0;
 let smoothFrame = 0;
-let currentFrame = 0;
+let currentFrame = -1;
 let scrollProgress = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const preloadedFrames = new Map();
-const requestedFrames = new Set([0]);
-const readyFrames = new Set([0]);
+const requestedFrames = new Set();
+const readyFrames = new Set();
 let pendingFrame = 0;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
@@ -26,7 +27,7 @@ function updateScrollProgress() {
 }
 
 function preloadFrames() {
-  const priorityFrames = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 95];
+  const priorityFrames = [0, 1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 95];
   priorityFrames.forEach(requestFrame);
 
   const loadRemaining = () => {
@@ -64,7 +65,7 @@ function requestFrame(index) {
     decode.then(() => {
       if (image.naturalWidth > 0) {
         readyFrames.add(index);
-        if (index === pendingFrame) {
+        if (index === pendingFrame || currentFrame < 0) {
           swapFrame(index);
         }
       }
@@ -77,11 +78,13 @@ function requestFrame(index) {
 }
 
 function warmNearbyFrames(index) {
+  requestFrame(index - 3);
   requestFrame(index - 2);
+  requestFrame(index - 1);
   requestFrame(index);
   requestFrame(index + 1);
   requestFrame(index + 2);
-  requestFrame(index - 1);
+  requestFrame(index + 3);
 }
 
 function findReadyFrame(index) {
@@ -105,12 +108,44 @@ function findReadyFrame(index) {
   return currentFrame;
 }
 
+function resizeCanvas() {
+  const rect = missionFrame.getBoundingClientRect();
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, Math.round(rect.width * pixelRatio));
+  const height = Math.max(1, Math.round(rect.height * pixelRatio));
+
+  if (missionFrame.width !== width || missionFrame.height !== height) {
+    missionFrame.width = width;
+    missionFrame.height = height;
+    drawFrame(currentFrame);
+  }
+}
+
+function drawFrame(index) {
+  const image = preloadedFrames.get(index);
+  if (!image || !readyFrames.has(index) || image.naturalWidth === 0) {
+    return;
+  }
+
+  const canvasWidth = missionFrame.width;
+  const canvasHeight = missionFrame.height;
+  const scale = Math.max(canvasWidth / image.naturalWidth, canvasHeight / image.naturalHeight);
+  const drawWidth = image.naturalWidth * scale;
+  const drawHeight = image.naturalHeight * scale;
+  const offsetX = (canvasWidth - drawWidth) / 2;
+  const offsetY = (canvasHeight - drawHeight) / 2;
+
+  frameContext.fillStyle = "#07101b";
+  frameContext.fillRect(0, 0, canvasWidth, canvasHeight);
+  frameContext.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+}
+
 function swapFrame(index) {
   if (index === currentFrame || !readyFrames.has(index)) {
     return;
   }
   currentFrame = index;
-  missionFrame.src = framePaths[currentFrame];
+  drawFrame(currentFrame);
 }
 
 function updateMissionFrame() {
@@ -131,6 +166,7 @@ function updateCssState() {
 }
 
 function tick() {
+  resizeCanvas();
   updateScrollProgress();
   updateMissionFrame();
   updateCssState();
@@ -153,5 +189,8 @@ function setupReveals() {
 
 preloadFrames();
 setupReveals();
+resizeCanvas();
 updateScrollProgress();
 tick();
+
+window.addEventListener("resize", resizeCanvas, { passive: true });

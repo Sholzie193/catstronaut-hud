@@ -16,17 +16,14 @@
     <main id="top">
       <section class="orbital-stage" aria-label="Catstronaut HUD video experience">
         <div class="sticky-orbit">
-          <img
+          <canvas
             id="missionFrame"
             class="mission-video"
-            src="/frames/frame_000.jpg"
             width="1280"
             height="720"
-            fetchpriority="high"
-            decoding="async"
-            alt="Astronaut cat floating above Earth"
+            role="img"
             aria-label="Astronaut cat floating above Earth"
-          >
+          ></canvas>
 
           <div class="vignette" aria-hidden="true"></div>
           <div class="glass-sheen" aria-hidden="true"></div>
