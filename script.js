@@ -5,7 +5,20 @@ const frameContext = missionFrame.getContext("2d", { alpha: false, desynchronize
 const progressBar = document.querySelector("#progressBar");
 
 const frameCount = 96;
-const framePaths = Array.from({ length: frameCount }, (_, index) => `/frames/frame_${String(index).padStart(3, "0")}.jpg`);
+const frameSets = {
+  standard: {
+    name: "standard",
+    basePath: "/frames",
+    pixelRatioCap: 2
+  },
+  high: {
+    name: "high",
+    basePath: "/frames-hq",
+    pixelRatioCap: 1.65
+  }
+};
+
+let activeFrameSet = selectFrameSet();
 let targetFrame = 0;
 let smoothFrame = 0;
 let currentFrame = -1;
@@ -15,9 +28,34 @@ const preloadedFrames = new Map();
 const requestedFrames = new Set();
 const readyFrames = new Set();
 let pendingFrame = 0;
+let frameRequestVersion = 0;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (from, to, amount) => from + (to - from) * amount;
+const getFramePath = (index) => `${activeFrameSet.basePath}/frame_${String(index).padStart(3, "0")}.jpg`;
+
+function selectFrameSet() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const constrainedNetwork = connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "");
+
+  if (constrainedNetwork) {
+    return frameSets.standard;
+  }
+
+  return frameSets.high;
+}
+
+function resetFrameCache(nextFrameSet) {
+  activeFrameSet = nextFrameSet;
+  frameRequestVersion += 1;
+  preloadedFrames.clear();
+  requestedFrames.clear();
+  readyFrames.clear();
+  currentFrame = -1;
+  pendingFrame = clamp(Math.round(smoothFrame), 0, frameCount - 1);
+  root.dataset.frameQuality = activeFrameSet.name;
+  preloadFrames();
+}
 
 function updateScrollProgress() {
   const rect = stage.getBoundingClientRect();
@@ -27,20 +65,33 @@ function updateScrollProgress() {
 }
 
 function preloadFrames() {
+  const preloadVersion = frameRequestVersion;
   const priorityFrames = [0, 1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 95];
-  priorityFrames.forEach(requestFrame);
+  priorityFrames.forEach((index) => requestFrame(index, true));
 
   const loadRemaining = () => {
-    let index = 1;
+    if (preloadVersion !== frameRequestVersion) {
+      return;
+    }
+
+    const remainingFrames = Array.from({ length: frameCount }, (_, index) => index)
+      .filter((index) => !priorityFrames.includes(index));
+    let cursor = 0;
+
     const loadBatch = () => {
-      const end = Math.min(frameCount, index + 8);
-      for (; index < end; index += 1) {
-        requestFrame(index);
+      if (preloadVersion !== frameRequestVersion) {
+        return;
       }
-      if (index < frameCount) {
+
+      const end = Math.min(remainingFrames.length, cursor + 8);
+      for (; cursor < end; cursor += 1) {
+        requestFrame(remainingFrames[cursor]);
+      }
+      if (cursor < remainingFrames.length) {
         setTimeout(loadBatch, 180);
       }
     };
+
     loadBatch();
   };
 
@@ -51,18 +102,30 @@ function preloadFrames() {
   }
 }
 
-function requestFrame(index) {
+function requestFrame(index, priority = false) {
   if (requestedFrames.has(index) || index < 0 || index >= frameCount) {
     return;
   }
+  const requestVersion = frameRequestVersion;
   requestedFrames.add(index);
   const image = new Image();
   image.decoding = "async";
+  if ("fetchPriority" in image) {
+    image.fetchPriority = priority ? "high" : "auto";
+  }
   preloadedFrames.set(index, image);
 
   const markReady = () => {
+    if (requestVersion !== frameRequestVersion) {
+      return;
+    }
+
     const decode = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
     decode.then(() => {
+      if (requestVersion !== frameRequestVersion) {
+        return;
+      }
+
       if (image.naturalWidth > 0) {
         readyFrames.add(index);
         if (index === pendingFrame || currentFrame < 0) {
@@ -73,8 +136,12 @@ function requestFrame(index) {
   };
 
   image.addEventListener("load", markReady, { once: true });
-  image.addEventListener("error", () => requestedFrames.delete(index), { once: true });
-  image.src = framePaths[index];
+  image.addEventListener("error", () => {
+    if (requestVersion === frameRequestVersion) {
+      requestedFrames.delete(index);
+    }
+  }, { once: true });
+  image.src = getFramePath(index);
 }
 
 function warmNearbyFrames(index) {
@@ -109,8 +176,13 @@ function findReadyFrame(index) {
 }
 
 function resizeCanvas() {
+  const nextFrameSet = selectFrameSet();
+  if (nextFrameSet.name !== activeFrameSet.name) {
+    resetFrameCache(nextFrameSet);
+  }
+
   const rect = missionFrame.getBoundingClientRect();
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, activeFrameSet.pixelRatioCap);
   const width = Math.max(1, Math.round(rect.width * pixelRatio));
   const height = Math.max(1, Math.round(rect.height * pixelRatio));
 
@@ -137,6 +209,8 @@ function drawFrame(index) {
 
   frameContext.fillStyle = "#07101b";
   frameContext.fillRect(0, 0, canvasWidth, canvasHeight);
+  frameContext.imageSmoothingEnabled = true;
+  frameContext.imageSmoothingQuality = "high";
   frameContext.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 }
 
@@ -187,6 +261,7 @@ function setupReveals() {
   reveals.forEach((item) => observer.observe(item));
 }
 
+root.dataset.frameQuality = activeFrameSet.name;
 preloadFrames();
 setupReveals();
 resizeCanvas();

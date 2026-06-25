@@ -80,7 +80,12 @@ a {
   position: absolute;
   inset: -28vh 0 auto;
   height: 28vh;
-  background: #07101b url("/frames/frame_000.jpg") center top / cover no-repeat;
+  background-color: #07101b;
+  background-image: url("/frames/frame_000.jpg");
+  background-image: image-set(url("/frames/frame_000.jpg") 1x, url("/frames-hq/frame_000.jpg") 2x);
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
   filter: brightness(1.08) saturate(1.18) contrast(1.2);
   pointer-events: none;
 }
@@ -110,7 +115,12 @@ a {
   object-fit: cover;
   object-position: center;
   z-index: 0;
-  background: #07101b url("/frames/frame_000.jpg") center / cover no-repeat;
+  background-color: #07101b;
+  background-image: url("/frames/frame_000.jpg");
+  background-image: image-set(url("/frames/frame_000.jpg") 1x, url("/frames-hq/frame_000.jpg") 2x);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   filter: brightness(1.08) saturate(1.18) contrast(1.2);
   transform: scale(var(--video-scale, 1.02)) translate3d(0, 0, 0);
   transition: filter 180ms ease;
