@@ -14,7 +14,8 @@ const frameSets = {
   high: {
     name: "high",
     basePath: "/frames-hq",
-    pixelRatioCap: 1.65
+    pixelRatioCap: 1.65,
+    mobilePixelRatioCap: 2
   }
 };
 
@@ -33,6 +34,12 @@ let frameRequestVersion = 0;
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (from, to, amount) => from + (to - from) * amount;
 const getFramePath = (index) => `${activeFrameSet.basePath}/frame_${String(index).padStart(3, "0")}.jpg`;
+const getPixelRatioCap = () => {
+  const isMobileLayout = window.matchMedia("(max-width: 680px)").matches;
+  return isMobileLayout && activeFrameSet.mobilePixelRatioCap
+    ? activeFrameSet.mobilePixelRatioCap
+    : activeFrameSet.pixelRatioCap;
+};
 
 function selectFrameSet() {
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -182,7 +189,7 @@ function resizeCanvas() {
   }
 
   const rect = missionFrame.getBoundingClientRect();
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, activeFrameSet.pixelRatioCap);
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, getPixelRatioCap());
   const width = Math.max(1, Math.round(rect.width * pixelRatio));
   const height = Math.max(1, Math.round(rect.height * pixelRatio));
 
