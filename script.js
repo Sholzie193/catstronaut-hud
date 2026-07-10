@@ -203,7 +203,7 @@ function resizeCanvas() {
 function drawFrame(index) {
   const image = preloadedFrames.get(index);
   if (!image || !readyFrames.has(index) || image.naturalWidth === 0) {
-    return;
+    return false;
   }
 
   const canvasWidth = missionFrame.width;
@@ -219,14 +219,17 @@ function drawFrame(index) {
   frameContext.imageSmoothingEnabled = true;
   frameContext.imageSmoothingQuality = "high";
   frameContext.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+  root.dataset.framesReady = "true";
+  return true;
 }
 
 function swapFrame(index) {
   if (index === currentFrame || !readyFrames.has(index)) {
     return;
   }
-  currentFrame = index;
-  drawFrame(currentFrame);
+  if (drawFrame(index)) {
+    currentFrame = index;
+  }
 }
 
 function updateMissionFrame() {

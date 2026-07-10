@@ -11,12 +11,22 @@
     <meta name="twitter:card" content="summary_large_image">
     <title>Catstronaut HUD</title>
     <link rel="preload" as="image" href="/frames-hq/frame_000.jpg" imagesrcset="/frames/frame_000.jpg 1x, /frames-hq/frame_000.jpg 2x">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=20260710-3">
   </head>
   <body>
+    <a class="skip-link" href="#telemetry">Skip to mission details</a>
     <main id="top">
       <section class="orbital-stage" aria-label="Catstronaut HUD video experience">
         <div class="sticky-orbit">
+          <img
+            class="mission-poster"
+            src="/frames-hq/frame_000.jpg"
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            alt=""
+            aria-hidden="true"
+          >
           <canvas
             id="missionFrame"
             class="mission-video"
@@ -85,25 +95,45 @@
 
       <section id="telemetry" class="content-band telemetry-band">
         <div class="section-inner split-layout">
-          <div>
+          <div class="telemetry-intro reveal">
             <p class="section-label">Telemetry</p>
             <h2 data-text="Designed like a mission interface, not a video embed.">Designed like a mission interface, not a video embed.</h2>
+            <dl class="mission-metrics" aria-label="Animation specifications">
+              <div>
+                <dt>Sequence</dt>
+                <dd>96 frames</dd>
+              </div>
+              <div>
+                <dt>Source</dt>
+                <dd>1080p HQ</dd>
+              </div>
+              <div>
+                <dt>Control</dt>
+                <dd>Scroll-linked</dd>
+              </div>
+            </dl>
           </div>
           <div class="feature-grid">
             <article class="feature-card reveal">
               <span class="feature-index">01</span>
-              <h3>Scroll-scrubbed drift</h3>
-              <p>The 8-second clip is mapped to page progress, so the viewer controls the orbital movement instead of watching a passive loop.</p>
+              <div class="feature-copy">
+                <h3>Scroll-scrubbed drift</h3>
+                <p>The 8-second clip is mapped to page progress, so the viewer controls the orbital movement instead of watching a passive loop.</p>
+              </div>
             </article>
             <article class="feature-card reveal">
               <span class="feature-index">02</span>
-              <h3>Glass HUD layers</h3>
-              <p>Translucent panels and visor reflections build on the helmet shape already present in the footage without covering the clip.</p>
+              <div class="feature-copy">
+                <h3>Glass HUD layers</h3>
+                <p>Translucent panels and visor reflections build on the helmet shape already present in the footage without covering the clip.</p>
+              </div>
             </article>
             <article class="feature-card reveal">
               <span class="feature-index">03</span>
-              <h3>Responsive by design</h3>
-              <p>Mobile uses a calmer layout with compact panels and protected text zones while preserving the same immersive feel.</p>
+              <div class="feature-copy">
+                <h3>Responsive by design</h3>
+                <p>Mobile uses a calmer layout with compact panels and protected text zones while preserving the same immersive feel.</p>
+              </div>
             </article>
           </div>
         </div>
@@ -112,12 +142,25 @@
       <section id="capture" class="content-band capture-band">
         <div class="section-inner capture-layout">
           <div class="capture-frame reveal" aria-hidden="true">
-            <img class="mini-video" src="/frames-hq/frame_095.jpg" width="1920" height="1080" alt="">
+            <img class="mini-video" src="/frames-hq/frame_064.jpg" width="1920" height="1080" alt="">
+            <div class="frame-hud">
+              <span>Capture 064</span>
+              <span>16:9 / HQ</span>
+            </div>
+            <div class="frame-caption">
+              <span>Earth orbit</span>
+              <strong>Subject acquired</strong>
+            </div>
           </div>
           <div class="capture-copy reveal">
             <p class="section-label">Capture mode</p>
             <h2 data-text="A clean final scene for X, reels, and short posts.">A clean final scene for X, reels, and short posts.</h2>
             <p>The ending is kept readable and high-contrast so a screen recording still looks intentional after platform compression.</p>
+            <div class="capture-facts" aria-label="Capture qualities">
+              <span>Protected contrast</span>
+              <span>Social-safe framing</span>
+              <span>High-resolution source</span>
+            </div>
           </div>
         </div>
       </section>
@@ -131,10 +174,19 @@
             <span class="action-glyph" aria-hidden="true"></span>
             <span>Replay orbit</span>
           </a>
+          <div class="share-signoff" aria-hidden="true">
+            <span>Mission 08S</span>
+            <span>Final frame 095</span>
+          </div>
         </div>
       </section>
+
+      <footer class="site-footer">
+        <span>Catstronaut HUD</span>
+        <span>Low orbit transmission</span>
+      </footer>
     </main>
 
-    <script src="./script.js"></script>
+    <script src="./script.js?v=20260710-3"></script>
   </body>
 </html>
