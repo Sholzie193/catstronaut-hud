@@ -1,8 +1,8 @@
 const stage = document.querySelector(".orbital-stage");
 const root = document.documentElement;
 const missionFrame = document.querySelector("#missionFrame");
+const missionPoster = document.querySelector(".mission-poster");
 const frameContext = missionFrame.getContext("2d", { alpha: false, desynchronized: true });
-const progressBar = document.querySelector("#progressBar");
 
 const frameCount = 96;
 const frameSets = {
@@ -14,8 +14,8 @@ const frameSets = {
   high: {
     name: "high",
     basePath: "/frames-hq",
-    pixelRatioCap: 1.65,
-    mobilePixelRatioCap: 2
+    pixelRatioCap: 1.5,
+    mobilePixelRatioCap: 1.75
   }
 };
 
@@ -30,6 +30,10 @@ const requestedFrames = new Set();
 const readyFrames = new Set();
 let pendingFrame = 0;
 let frameRequestVersion = 0;
+let stageTop = 0;
+let stageTravel = 1;
+let animationFrameId = 0;
+let resizeTimer = 0;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (from, to, amount) => from + (to - from) * amount;
@@ -65,16 +69,20 @@ function resetFrameCache(nextFrameSet) {
 }
 
 function updateScrollProgress() {
-  const rect = stage.getBoundingClientRect();
-  const travel = Math.max(1, rect.height - window.innerHeight);
-  scrollProgress = clamp(-rect.top / travel);
+  scrollProgress = clamp((window.scrollY - stageTop) / stageTravel);
   targetFrame = scrollProgress * (frameCount - 1);
+}
+
+function measureStage() {
+  const rect = stage.getBoundingClientRect();
+  stageTop = window.scrollY + rect.top;
+  stageTravel = Math.max(1, stage.offsetHeight - window.innerHeight);
 }
 
 function preloadFrames() {
   const preloadVersion = frameRequestVersion;
-  const priorityFrames = [0, 1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 95];
-  priorityFrames.forEach((index) => requestFrame(index, true));
+  const priorityFrames = [0, 1, 2, 4, 8, 16, 32, 48, 64, 80, 95];
+  priorityFrames.forEach((index, position) => requestFrame(index, position < 3));
 
   const loadRemaining = () => {
     if (preloadVersion !== frameRequestVersion) {
@@ -85,21 +93,33 @@ function preloadFrames() {
       .filter((index) => !priorityFrames.includes(index));
     let cursor = 0;
 
+    const scheduleBatch = () => {
+      if (preloadVersion !== frameRequestVersion) {
+        return;
+      }
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(loadBatch, { timeout: 1200 });
+      } else {
+        setTimeout(loadBatch, 180);
+      }
+    };
+
     const loadBatch = () => {
       if (preloadVersion !== frameRequestVersion) {
         return;
       }
 
-      const end = Math.min(remainingFrames.length, cursor + 8);
+      const end = Math.min(remainingFrames.length, cursor + 4);
       for (; cursor < end; cursor += 1) {
         requestFrame(remainingFrames[cursor]);
       }
       if (cursor < remainingFrames.length) {
-        setTimeout(loadBatch, 180);
+        setTimeout(scheduleBatch, 100);
       }
     };
 
-    loadBatch();
+    scheduleBatch();
   };
 
   if ("requestIdleCallback" in window) {
@@ -219,8 +239,19 @@ function drawFrame(index) {
   frameContext.imageSmoothingEnabled = true;
   frameContext.imageSmoothingQuality = "high";
   frameContext.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-  root.dataset.framesReady = "true";
+  markFramesReady();
   return true;
+}
+
+function markFramesReady() {
+  if (root.dataset.framesReady === "true") {
+    return;
+  }
+
+  root.dataset.framesReady = "true";
+  if (missionPoster) {
+    setTimeout(() => missionPoster.remove(), 220);
+  }
 }
 
 function swapFrame(index) {
@@ -238,23 +269,38 @@ function updateMissionFrame() {
   pendingFrame = nextFrame;
   warmNearbyFrames(nextFrame);
   swapFrame(findReadyFrame(nextFrame));
+  return !reducedMotion && Math.abs(targetFrame - smoothFrame) > 0.02;
 }
 
 function updateCssState() {
   root.style.setProperty("--scroll-progress", scrollProgress.toFixed(4));
   root.style.setProperty("--video-scale", `${(1.03 - scrollProgress * 0.02).toFixed(4)}`);
   root.style.setProperty("--copy-y", `${(scrollProgress * -16).toFixed(2)}px`);
-  if (progressBar) {
-    progressBar.style.width = `${scrollProgress * 100}%`;
-  }
 }
 
 function tick() {
-  resizeCanvas();
+  animationFrameId = 0;
   updateScrollProgress();
-  updateMissionFrame();
+  const isSettling = updateMissionFrame();
   updateCssState();
-  requestAnimationFrame(tick);
+  if (isSettling) {
+    scheduleTick();
+  }
+}
+
+function scheduleTick() {
+  if (!animationFrameId) {
+    animationFrameId = requestAnimationFrame(tick);
+  }
+}
+
+function handleResize() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    measureStage();
+    resizeCanvas();
+    scheduleTick();
+  }, 120);
 }
 
 function setupReveals() {
@@ -272,10 +318,13 @@ function setupReveals() {
 }
 
 root.dataset.frameQuality = activeFrameSet.name;
+root.dataset.animationLoop = "demand";
 preloadFrames();
 setupReveals();
+measureStage();
 resizeCanvas();
 updateScrollProgress();
-tick();
+scheduleTick();
 
-window.addEventListener("resize", resizeCanvas, { passive: true });
+window.addEventListener("scroll", scheduleTick, { passive: true });
+window.addEventListener("resize", handleResize, { passive: true });

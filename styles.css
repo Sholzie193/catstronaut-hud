@@ -146,22 +146,28 @@ a {
   background-repeat: no-repeat;
   filter: brightness(1.08) saturate(1.18) contrast(1.2);
   transform: scale(var(--video-scale, 1.02)) translate3d(0, 0, 0);
-  transition: filter 180ms ease;
-  will-change: transform;
 }
 
 .mission-poster {
   z-index: 0;
+  will-change: opacity;
 }
 
 .mission-video {
   z-index: 1;
   opacity: 0;
-  transition: opacity 180ms ease, filter 180ms ease;
+  transition: opacity 160ms ease;
+  will-change: transform, opacity;
 }
 
 html[data-frames-ready="true"] .mission-video {
   opacity: 1;
+}
+
+html[data-frames-ready="true"] .mission-poster {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms ease, visibility 0s linear 160ms;
 }
 
 .vignette {
@@ -232,12 +238,6 @@ html[data-frames-ready="true"] .mission-video {
   border-radius: 50%;
   border: 2px solid var(--cyan);
   box-shadow: 0 0 18px rgba(126, 220, 255, 0.7);
-  animation: signal-pulse 2.8s ease-in-out infinite;
-}
-
-@keyframes signal-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(126, 220, 255, 0.38); }
-  50% { box-shadow: 0 0 22px rgba(126, 220, 255, 0.78); }
 }
 
 .navlinks {
@@ -433,11 +433,14 @@ h1::after {
 
 .progress-shell span {
   display: block;
-  width: calc(var(--scroll-progress, 0) * 100%);
+  width: 100%;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--cyan), var(--amber));
   box-shadow: 0 0 18px rgba(126, 220, 255, 0.64);
+  transform: scaleX(var(--scroll-progress, 0));
+  transform-origin: left center;
+  will-change: transform;
 }
 
 .scanner-card {
