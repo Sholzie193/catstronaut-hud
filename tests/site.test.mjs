@@ -8,3 +8,21 @@ test('saved time collisions are blocked while rescheduling the same visit is all
 test('malformed local storage fails safely and invalid records are discarded',()=>{assert.deepEqual(readVisits({getItem:()=>'{bad'}),[]);assert.deepEqual(readVisits({getItem:()=>JSON.stringify([state,{id:'broken'},null])}),[state]);assert.deepEqual(readVisits({getItem:()=>{throw Error('blocked')}}),[])});
 test('calendar reminder remains clearly a demo, escapes user content and has correct duration',()=>{const text=calendarText({...state,pet:'Luna, Moon\nBEGIN:VEVENT'},services[0]);assert.ok(text.includes('SUMMARY:DEMO: Luna\\, Moon\\nBEGIN:VEVENT'));assert.ok(text.includes('DTSTART:20260914T093000'));assert.ok(text.includes('DTEND:20260914T100000'));assert.equal((text.match(/\r\nBEGIN:VEVENT/g)||[]).length,1);assert.ok(text.includes('No real clinical appointment'))});
 test('scroll poses stay bounded and reversible through jumps and all supported layouts',()=>{for(const mobile of [false,true]){for(const p of [-1,0,.12,.4,.55,.8,1,5]){const pose=scenePose(p,mobile);assert.ok(Object.values(pose).every(Number.isFinite));assert.ok(pose.frame>=0&&pose.frame<=95);for(const key of ['introOpacity','wordOpacity','outroOpacity'])assert.ok(pose[key]>=0&&pose[key]<=1)}assert.deepEqual(scenePose(.4,mobile),scenePose(.4,mobile))}assert.equal(scenePose(0).introOpacity,1);assert.equal(scenePose(1).outroOpacity,1);assert.equal(scenePose(.5).wordOpacity,1)});
+
+test('playback damping is monotonic, reversible and consistent across frame rates',async()=>{
+ const {advanceFrame}=await import('../src/motion.mjs');
+ const run=hz=>{let value=0;for(let i=0;i<hz/4;i++)value=advanceFrame(value,95,1/hz);return value;};
+ assert.ok(Math.abs(run(60)-run(120))<.001);
+ assert.ok(run(60)>94);
+ let current=95;for(let i=0;i<30;i++){const next=advanceFrame(current,0,1/60);assert.ok(next<=current&&next>=0);current=next;}assert.ok(current<.01);
+ assert.equal(advanceFrame(20,90,-1),20);
+});
+test('frame warming prioritizes current playback and destination without invalid or duplicate requests',async()=>{
+ const {framePriorities}=await import('../src/motion.mjs');
+ for(const [current,target] of [[0,95],[95,0],[48,65],[48,23]]){const order=framePriorities(current,target);assert.equal(order[0],current);assert.equal(order.length,96);assert.equal(new Set(order).size,96);assert.ok(order.slice(0,4).includes(target));assert.ok(order.every(i=>i>=0&&i<96));}
+});
+test('space-jump burst settles completely and cannot retain a negative or out-of-range strength',async()=>{
+ const {flightEnvelope}=await import('../src/effects.mjs');
+ assert.equal(flightEnvelope(-1),0);assert.equal(flightEnvelope(0),0);assert.equal(flightEnvelope(2.2),0);assert.equal(flightEnvelope(10),0);assert.equal(flightEnvelope(1.1),1);
+ for(let t=0;t<2.3;t+=.01)assert.ok(flightEnvelope(t)>=0&&flightEnvelope(t)<=1);
+});
