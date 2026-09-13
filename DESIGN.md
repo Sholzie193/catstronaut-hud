@@ -56,3 +56,7 @@ User requested a stronger layer of original motion around the supplied cat foota
 ### Focused hero follow-up
 
 User found the added hero overlays distracting. The opening now shows the supplied cat film and existing readable copy without the added rings, stars, pointer depth or Space jump control. These effects begin only after the introductory copy has cleared (27% of the existing scroll sequence), with the orbital rings easing into the transition. Returning to the opening removes the effects again and suspends their rendering. The watermark patch stays in place but is static during the opening. Playback smoothing and the rest of the planetary transition are retained.
+
+### Full-sequence clarification
+
+User clarified that the added overlay must be removed throughout the video-to-scroll motion, retaining the green ending. Removed the orbital rings, additional star canvas, jump wave, Space jump control and their animation loop from the implementation entirely. The original cat playback, dimensional text, watermark patch and green planetary handoff remain. The green horizon now follows the existing film progress directly, without an additional continuous renderer.

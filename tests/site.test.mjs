@@ -21,8 +21,3 @@ test('frame warming prioritizes current playback and destination without invalid
  const {framePriorities}=await import('../src/motion.mjs');
  for(const [current,target] of [[0,95],[95,0],[48,65],[48,23]]){const order=framePriorities(current,target);assert.equal(order[0],current);assert.equal(order.length,96);assert.equal(new Set(order).size,96);assert.ok(order.slice(0,4).includes(target));assert.ok(order.every(i=>i>=0&&i<96));}
 });
-test('space-jump burst settles completely and cannot retain a negative or out-of-range strength',async()=>{
- const {flightEnvelope}=await import('../src/effects.mjs');
- assert.equal(flightEnvelope(-1),0);assert.equal(flightEnvelope(0),0);assert.equal(flightEnvelope(2.2),0);assert.equal(flightEnvelope(10),0);assert.equal(flightEnvelope(1.1),1);
- for(let t=0;t<2.3;t+=.01)assert.ok(flightEnvelope(t)>=0&&flightEnvelope(t)<=1);
-});
