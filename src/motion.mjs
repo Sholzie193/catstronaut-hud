@@ -36,7 +36,7 @@ export function initOrbit(){
  }
  function evict(){
    if(bitmaps.size<=maxDecoded)return;
-   const wanted=Math.round(smooth),keys=[...bitmaps.keys()].filter(i=>i!==lastDraw&&i!==wanted).sort((a,b)=>Math.abs(b-smooth)-Math.abs(a-smooth));
+   const protectedFrames=new Set([...priority.slice(0,18),lastDraw,Math.round(smooth)]),keys=[...bitmaps.keys()].filter(i=>!protectedFrames.has(i)).sort((a,b)=>Math.abs(b-smooth)-Math.abs(a-smooth));
    while(bitmaps.size>maxDecoded&&keys.length){const i=keys.shift();bitmaps.get(i).close();bitmaps.delete(i);}
  }
  async function fetchFrame(index){
