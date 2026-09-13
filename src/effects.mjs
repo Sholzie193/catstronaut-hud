@@ -29,6 +29,7 @@ function initSpace(stage) {
   const rings = stage.querySelector('.orbital-system');
   const limb = stage.querySelector('.earth-limb');
   const word = stage.querySelector('.space-word span');
+  let active=false;
   let width=1,height=1,p=0,last=0,clock=0,raf=0,jumpTime=-1,visible=false,suspended=false;
   let targetX=0,targetY=0,mouseX=0,mouseY=0,lastPaint=0;
   const reduced = () => document.documentElement.dataset.motion === 'paused';
@@ -47,17 +48,18 @@ function initSpace(stage) {
     ctx.setTransform(dpr,0,0,dpr,0,0);lastPaint=0;queue();
   }
   function sync(){
-    const running=visible&&!document.hidden&&!reduced()&&!suspended;
+    const running=active&&visible&&!document.hidden&&!reduced()&&!suspended;
     stage.classList.toggle('effects-resting',!running);
-    jump.disabled=reduced();
+    jump.disabled=reduced()||!active;
     jump.title=reduced()?'Resume motion to try the space jump':'Take a little flight';
     if(!running){cancelAnimationFrame(raf);raf=0;last=0;jumpTime=-1;stage.style.setProperty('--jump','0');jump.removeAttribute('aria-busy');jump.querySelector('b').textContent='Space jump';ctx.clearRect(0,0,width,height);}
     else queue();
+    if(!active){mouseX=mouseY=0;stage.style.setProperty('--pointer-x','0px');stage.style.setProperty('--pointer-y','0px');limb.style.transform='translateY(105%) rotate(-16deg) scale(.8)';stage.classList.remove('is-landing','has-landed');}
   }
-  function queue(){if(!raf&&visible&&!document.hidden&&!reduced()&&!suspended)raf=requestAnimationFrame(frame);}
+  function queue(){if(!raf&&active&&visible&&!document.hidden&&!reduced()&&!suspended)raf=requestAnimationFrame(frame);}
   function frame(now){
     raf=0;
-    if(!visible||document.hidden||reduced()||suspended)return;
+    if(!active||!visible||document.hidden||reduced()||suspended)return;
     // Drawing at 30 fps bounds decorative work; the original scroll renderer is independent.
     if(now-lastPaint<30){queue();return;}
     lastPaint=now;
@@ -71,7 +73,7 @@ function initSpace(stage) {
     stage.style.setProperty('--ring-turn',`${p*165+clock*3}deg`);
     stage.style.setProperty('--ring-pitch',`${58+p*32+mouseY*10}deg`);
     stage.style.setProperty('--ring-yaw',`${-24+p*80+mouseX*12}deg`);
-    rings.style.opacity=String((1-clamp((p-.79)/.18))*.8);
+    rings.style.opacity=String(clamp((p-.27)/.12)*(1-clamp((p-.79)/.18))*.8);
     const landing=clamp((p-.72)/.28);
     limb.style.transform=`translateY(${105-landing*81}%) rotate(${-16+landing*16}deg) scale(${.8+landing*.3})`;
     stage.classList.toggle('is-landing',landing>.5);stage.classList.toggle('has-landed',p>(width<601?.9:.965));
@@ -92,14 +94,14 @@ function initSpace(stage) {
     }
     queue();
   }
-  stage.addEventListener('orbit:progress',e=>{p=e.detail;queue();});
+  stage.addEventListener('orbit:progress',e=>{p=e.detail;const next=p>.27;if(next!==active){active=next;stage.classList.toggle('effects-active',active);sync();}else queue();});
   stage.addEventListener('pointermove',e=>{
     if(e.pointerType!=='mouse')return;
     const box=stage.getBoundingClientRect();targetX=clamp((e.clientX-box.left)/box.width)*2-1;targetY=clamp((e.clientY-box.top)/box.height)*2-1;
   },{passive:true});
   stage.addEventListener('pointerleave',()=>{targetX=targetY=0;});
   jump.addEventListener('click',()=>{
-    if(reduced()||jumpTime>=0)return;
+    if(!active||reduced()||jumpTime>=0)return;
     jumpTime=0;jump.setAttribute('aria-busy','true');jump.querySelector('b').textContent='In flight';queue();
   });
   const io=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();},{threshold:0});io.observe(stage);

@@ -50,3 +50,7 @@ html[data-motion=paused] .orbital-system,html[data-motion=paused] #stardust,html
 @media(max-width:600px){.orbital-system{top:31%;width:92vw}.jump-wave{top:31%;width:100vw}.orbit-ring b{font-size:29px;left:-14px}.orbit-ring i:before{width:7px;height:7px;top:-3px}.ring-three{inset:-5%}.space-jump{gap:7px;font-size:8px;min-height:44px;padding:9px 12px}.space-jump b{min-width:58px}.space-jump>span:first-child{font-size:17px}.scene-tools{gap:12px}.scene-count{display:none}.scene-progress{min-width:15px}.earth-limb{inset:0 -65% -45%}}
 @media(max-height:600px) and (min-width:601px){.orbital-system{width:52vh;left:69%;top:42%}.space-jump{min-height:42px;padding:8px 14px}.orbit-caption{right:var(--pad);left:auto}.earth-limb{inset:-30% -30% -30%}.is-landing .orbit-outro{bottom:83px}}
 @media(max-height:600px) and (min-width:601px){.flight-seal{display:none}.scene-tools{left:0;right:0;bottom:0;padding:8px var(--pad);height:64px;background:#07151d;border-top:1px solid #d7ef7225}.is-landing .scene-tools{color:var(--paper)}.is-landing .scene-progress{background:#ffffff40}.is-landing .scene-progress span{background:var(--lime)}}
+
+/* Keep the opening film clear. Added effects belong to the following transition. */
+.orbit-stage:not(.effects-active) .orbital-system,.orbit-stage:not(.effects-active) #stardust,.orbit-stage:not(.effects-active) .jump-wave,.orbit-stage:not(.effects-active) .space-jump{visibility:hidden;pointer-events:none}
+.orbit-stage:not(.effects-active) .seal-lettering{animation-play-state:paused}
